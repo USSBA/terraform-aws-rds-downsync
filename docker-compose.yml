@@ -1,0 +1,38 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: pgdatabase
+    #volumes:
+    #  # Used for local development to insert dummy data to table
+    #  - ${PWD}/postgres_data:/docker-entrypoint-initdb.d
+  downsync:
+    build: ./docker
+    image: test/test
+    #volumes:
+      # The below volumes can be used for local development testing only
+      #- ${PWD}/postgres_files:/tmp/files
+      #- ${HOME}/.aws/:/root/.aws/
+    environment:
+      # AWS variables are used for local development only
+      AWS_PROFILE: eli-sso-lower
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      # Required variables used by the downsync / restore container
+      DUMP_DIR: /tmp/files/
+      RDS_IDENTIFIER: certify-rds
+      SQL_CLIENT: postgresql-client-11
+      S3_BUCKET: temp-eli-solr-data-move
+      # SCRUB_SCRIPTS is optional and performed during restore only
+      SCRUB_SCRIPTS: scrub001.sql
+      # Required postgres variables for downsync / restore
+      PGUSER: pguser
+      PGPASSWORD: pgpassword
+      PGDATABASE: pgdatabase
+      PGHOST: postgres
+      PGPORT: 5432
+    command: sync_restore.sh
+    #command: #sync_dump.sh
