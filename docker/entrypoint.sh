@@ -15,9 +15,9 @@ case $SQL_CLIENT in
   ;;
   mysql*)
     apt-get install -y $SQL_CLIENT
-    export DUMP="undefined"
-    export RESTORE="undefined"
-    export SQL="undefined"
+    export DUMP="mysqldump"
+    export RESTORE="mysql"
+    export SQL="mysql"
   ;;
   *)
     echo "The SQL_CLIENT is not supported"
