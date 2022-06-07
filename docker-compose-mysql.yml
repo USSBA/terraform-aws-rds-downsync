@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_USER=mysql
+      - MYSQL_PASSWORD=mysql
+      - MYSQL_DATABASE=mysql
+    volumes:
+      # Used for local development to insert dummy data to table
+      - ${PWD}/test_data/mysql:/docker-entrypoint-initdb.d
+  downsync:
+    build: ./docker
+    image: test/test
+    volumes:
+      # The below volumes can be used for local development testing only
+      - ${PWD}/postgres_files:/tmp/files
+      - ${HOME}/.aws/:/root/.aws/
+    environment:
+      # AWS variables are used for local development only
+      AWS_PROFILE: ${AWS_PROFILE}
+      AWS_REGION: ${AWS_REGION}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      # Required variables used by the downsync / restore container
+      RDS_IDENTIFIER: mysql
+      SQL_CLIENT: mysql-client
+      S3_BUCKET: s3_bucket
+      # Required mysql variables for downsync / restore
+      DBUSER: mysql
+      DBPASSWORD: mysql
+      DBNAME: mysql
+      DBHOST: mysql
+      DBPORT: 3306
+      # Optional variables
+      # SCRUB_SCRIPTS is optional and performed during restore only
+      #SCRUB_SCRIPTS: scrub001.sql
+      #DUMP_DIR: /tmp/files/
+    #command: sync_restore.sh
+    command: sync_dump.sh

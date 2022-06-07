@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# lets use postgres 12 by default
-export SQL_CLIENT=${SQL_CLIENT:-postgresql-client-12}
+export TIMESTAMP=$(date +"%Y-%m-%d")
 
 echo "Updaing Packages"
 apt-get update
@@ -12,12 +11,22 @@ case $SQL_CLIENT in
     export DUMP="pg_dump --verbose --format c -f"
     export RESTORE="pg_restore --verbose"
     export SQL="psql -f"
+    export PGUSER=${DBUSER}
+    export PGPASSWORD=${DBPASSWORD}
+    export PGDATABASE=${DBNAME}
+    export PGHOST=${DBHOST}
+    export PGPORT=${DBPORT}
   ;;
   mysql*)
     apt-get install -y $SQL_CLIENT
     export DUMP="mysqldump"
     export RESTORE="mysql"
     export SQL="mysql"
+    export MYSQL_USER=${DBUSER}
+    export MYSQL_PWD=${DBPASSWORD}
+    export MYSQL_DATABASE=${DBNAME}
+    export MYSQL_HOST=${DBHOST}
+    export MYSQL_TCP_PORT=${DBPORT}
   ;;
   *)
     echo "The SQL_CLIENT is not supported"

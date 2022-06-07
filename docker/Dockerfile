@@ -1,6 +1,8 @@
 FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV DUMP_DIR /tmp/files
+ENV SQL_CLIENT postgresql-client-12
 
 RUN apt-get update \
   && apt-get install -y gnupg dirmngr wget curl unzip \
