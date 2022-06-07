@@ -44,3 +44,24 @@ Postgres client requires variables for connectivity.
 - DBNAME
 - DBHOST
 - DBPORT
+
+## Build and Deployment Pipeline
+
+This project is built with CircleCI and has the configuration [in this repository](./.circleci/config.yml).
+
+### Feature Branch
+
+When a new branch is pushed to GitHub, circleci will:
+
+1) Tests the docker builds
+
+### Tag based deployment
+
+To trigger a build/deploy workflow for a specific environment, the following git tags can be used for their respective environments:
+
+* Production -> `vX.X.X`
+
+Production Example:
+```sh
+git tag v1.0.0 && git push origin v1.0.0
+```
