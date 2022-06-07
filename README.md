@@ -1,7 +1,8 @@
 # terraform-aws-rds-downsync
 
-The RDS downsync module is responsible for taking a database dump from a environment and restoring it to another (prod > stg). The environments currently must be in the same AWS account.
-This module does not yet support cross account access.
+A terraform module abstracting a proven method for synchronizing an RDS database from once instance to another. In addition does support the ability to run custom SQL scripts that can be used for sanitization purposes during the restore operation.
+
+**This module does not yet support cross account access.**
 
 ## Database Support
 
@@ -9,37 +10,37 @@ The module supports the following:
 - Postgres (postgresql-client-10 | postgresql-client-11 | postgresql-client-12)
 - MySQL (v5.6 and below)
 
-## Required Variables
+## Container Environment
+
+### Required variables
 
 The following variables are required to be passed into the Terraform container.
 
-- DUMP_DIR: The local directory where the database dump will be stored before being sent to s3. Defaults to `/tmp/files`.
+- RDS_IDENTIFIER: The identifier of your RDS instance.
+It will also be included as part of the s3 object key when uploading/downloading the SQL dump file
 
-- SQL_CLIENT: This must be one of the following, else it defaults to `postgres-client-12`.
+```sh
+s3://bucket-name/{rds-identifer}/db_{timestamp}.sql
+```
+
+- S3_BUCKET: The name of the s3 bucket where the database dumps and or scrub scripts will be stored
+
+### Optional variables 
+
+- DUMP_DIR: The directory within the container where dump and restore operations will be executed and files will be written and/or read. Potentially a good place to mount an EFS volume for working with larger databases.
+
+- SQL_CLIENT: The SQL client matching that of your RDS instance. This must be one of the following, else it defaults to `postgres-client-12`.
   - postgres-client-10
   - postgres-client-11
   - postgres-client-12
   - mysql-client
 
-- RDS_IDENTIFIER: The identifier of your RDS database. This will be used to dump or restore the appropriate database. It will also be used as a subfolder in s3, where the database file is stored.
+### Database variables
 
-- S3_BUCKET: The name of the s3 bucket where the database dumps and or scrub scripts will be stored
+Postgres client requires variables for connectivity.
 
-### Postgres variables used by the `postgres-client`
-
-Postgres client requires variables for connectivity. If using the `postgres-client` pass these variables into the module.
-
-- PGUSER
-- PGPASSWORD
-- PGDATABASE
-- PGHOST
-- PGPORT
-
-### MySQL variables used by the `mysql-client`
-
-MySQL client requires variables for connectivity. If using the `mysql-client` pass these variables into the module.
-
-- MYSQL_USER
-- MYSQL_HOST
-- MYSQL_PWD
-- MYSQL_DATABASE
+- DBUSER
+- DBPASSWORD
+- DBNAME
+- DBHOST
+- DBPORT
