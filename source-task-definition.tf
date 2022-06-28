@@ -1,47 +1,36 @@
-variable "image_tag" {
-  description = "image tag for downsync_restore. default is latest"
-  default     = var.image_tag
-}
-
 resource "aws_cloudwatch_log_group" "source" {
   name = "${var.source_prefix}-${var.database}-db-dump"
 }
 
-#locals {
-#  container_environment = {
-#    PGUSER                  = "sbaonemaster"
-#    PGDATABASE              = "sbaone_prod"
-#    PGHOST                  = "stg-certify-rds.cyy8xym5djtg.us-east-1.rds.amazonaws.com"
-#    RDS_INSTANCE_IDENTIFIER = "stg-certify-rds"
-#    TARGET_BUCKET           = "certify-db-downsync"
-#  }
-#  container_secrets_parameterstore = {
-#    PGPASSWORD = "stg/certify/rds/password"
-#  }
-#}
-
 resource "aws_ecs_task_definition" "source" {
-  family = "${var.source_prefix}-${var.database}-db-dump"
+  family                   = "${var.source_prefix}-${var.database}-db-dump"
   execution_role_arn       = aws_iam_role.source_exec.arn
   task_role_arn            = aws_iam_role.source_task.arn
   network_mode             = "awsvpc"
+  cpu                      = var.cpu
+  memory                   = var.memory
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
-      name        = "${var.source_prefix}-${var.database}-db-dump"
-      image       = "public.ecr.aws/ussba/terraform-aws-rds-downsync:${var.image_tag}"
-      cpu         = var.cpu
-      memory      = var.memory
-      essential   = true
-      environment = [for k, v in local.container_environment : { name = k, value = v }]
-      secrets     = [for k, v in local.container_secrets_parameterstore : { name = k, valueFrom = "${local.prefix_parameter_store}/${v}" }]
-      #entrypoint  = ["/scripts/entrypoint.restore.sh"]
-      #command     = ["/scripts/certify/stg_restore.sh"]
+      name      = "${var.source_prefix}-${var.database}-db-dump"
+      image     = "public.ecr.aws/ussba/terraform-aws-rds-downsync:${var.image_tag}"
+      cpu       = var.cpu
+      memory    = var.memory
+      essential = true
+      environment = [
+        { name = "DBPORT", value = tostring(var.source_db_port) },
+        { name = "DBHOST", value = var.source_db_host },
+        { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
+        { name = "SQL_CLIENT", value = var.sql_client },
+        { name = "S3_BUCKET", value = var.source_bucket }
+      ]
+      secrets = var.source_container_secrets
+      command = ["/usr/local/bin/sync_dump.sh"]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
           awslogs-group         = "${var.source_prefix}-${var.database}-db-dump"
-          awslogs-region        = var.region
+          awslogs-region        = data.aws_region.account.name
           awslogs-stream-prefix = "${var.source_prefix}-${var.database}-db-dump"
         }
       }
@@ -55,7 +44,7 @@ resource "aws_ecs_task_definition" "source" {
 data "aws_iam_policy_document" "source_exec" {
   statement {
     actions = [
-      "ecr:*",
+      "ecr-public:*",
     ]
     resources = ["*"]
   }
@@ -64,10 +53,9 @@ data "aws_iam_policy_document" "source_exec" {
       "ssm:GetParameter",
       "ssm:GetParameters",
     ]
-    # maybe?
-    resources = ["${local.prefix_parameter_store}/${var.source_secrets}"]
-    # just for reference
-    resources = ["${local.prefix_parameter_store}/stg/certify/rds/password"]
+    resources = [
+      for x in var.source_container_secrets : x.valueFrom
+    ]
   }
   statement {
     actions = [
@@ -108,12 +96,12 @@ resource "aws_iam_role_policy_attachment" "source_exec" {
 # Task Role
 
 data "aws_iam_policy_document" "source_task" {
-  statement {
-    sid       = "snsPublish"
-    actions   = ["sns:Publish"]
-    # figure this out
-    resources = ["${local.prefix_sns}sba-notification-framework-*"]
-  }
+  #statement {
+  #  sid       = "snsPublish"
+  #  actions   = ["sns:Publish"]
+  #  # figure this out
+  #  resources = ["${local.prefix_sns}sba-notification-framework-*"]
+  #}
   statement {
     actions = [
       "s3:ListBucket",
@@ -131,7 +119,7 @@ data "aws_iam_policy_document" "source_task" {
       "s3:AbortMultipartUpload",
     ]
     resources = [
-      "arn:aws:s3:::${var.source_bucket}/${var.rds_identifier}/*"
+      "arn:aws:s3:::${var.source_bucket}/${var.source_rds_identifier}/*"
     ]
   }
 }

@@ -1,29 +1,29 @@
 resource "aws_cloudwatch_event_rule" "source" {
-  name = "${var.source_prefix}-${var.database}-downsync"
+  name                = "${var.source_prefix}-${var.database}-downsync"
   schedule_expression = var.source_schedule
-  is_enabled = true
+  is_enabled          = true
 }
 
 resource "aws_cloudwatch_event_target" "source" {
-  rule = aws_cloudwatch_event_rule.source.name
+  rule      = aws_cloudwatch_event_rule.source.name
   target_id = "${var.source_prefix}-${var.database}-downsync"
-  arn = var.ecs_cluster
-  role_arn = aws_iam_role.source.arn
+  arn       = "arn:aws:ecs:${data.aws_region.account.name}:${data.aws_caller_identity.account.account_id}:cluster/${var.source_ecs_cluster}"
+  role_arn  = aws_iam_role.source.arn
 
   ecs_target {
-    launch_type = "FARGATE"
-    task_count = 1
-    task_definition_arn = # aws_ecs_task_definition.downsync_create.arn
+    launch_type         = "FARGATE"
+    task_count          = 1
+    task_definition_arn = aws_ecs_task_definition.source.arn
 
     network_configuration {
-      subnets = var.source_subnets
-      security_groups = var.source_security_groups
+      subnets          = var.source_subnets
+      security_groups  = [aws_security_group.source.id]
       assign_public_ip = false
     }
   }
 }
 resource "aws_iam_role" "source" {
-  name = "${var.source_prefix}-event-downsync"
+  name = "${var.source_prefix}-${var.database}-event-downsync"
 
   assume_role_policy = <<DOC
 {
@@ -43,7 +43,7 @@ DOC
 }
 
 resource "aws_iam_role_policy" "source" {
-  name = "${var.source_prefix}-event-downsync"
+  name = "${var.source_prefix}-${var.database}-event-downsync"
   role = aws_iam_role.source.id
 
   policy = <<DOC
