@@ -8,8 +8,10 @@ apt-get update
 case $SQL_CLIENT in
   postgresql*)
     apt-get install -y $SQL_CLIENT
-    export DUMP="pg_dump --verbose --format c -f"
-    export RESTORE="pg_restore --verbose"
+    export DUMP="pg_dump --verbose -Ft ${DBNAME}"
+    export RESTORE="pg_restore --verbose -e --clean -Ft -d ${DBNAME}"
+    #export DUMP="pg_dump --verbose --format c -f"
+    #export RESTORE="pg_restore --verbose -f"
     export SQL="psql -f"
     export PGUSER=${DBUSER}
     export PGPASSWORD=${DBPASSWORD}
