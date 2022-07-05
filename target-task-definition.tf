@@ -9,10 +9,11 @@ locals {
     { name = "TARGET_RDS_IDENTIFIER", value = var.target_rds_identifier },
     { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
     { name = "SQL_CLIENT", value = var.sql_client },
-    { name = "S3_BUCKET", value = var.source_bucket },
+    #{ name = "S3_BUCKET", value = var.source_bucket },
+    { name = "SOURCE_BUCKET", value = aws_s3_bucket.downsync.id },
+    { name = "SCRUB_BUCKET", value = aws_s3_bucket.scrub_scripts.id },
   ]
   optional_environment = [
-    var.scrub_bucket == null ? {} : { name = "SCRUB_BUCKET", value = var.scrub_bucket },
     length(var.scrub_scripts) == 0 ? {} : { name = "SCRUB_SCRIPTS", value = join(" ", var.scrub_scripts) },
   ]
 }
@@ -109,8 +110,8 @@ data "aws_iam_policy_document" "target_task" {
       "s3:ListBucket",
     ]
     resources = concat(
-      ["arn:aws:s3:::${var.source_bucket}"],
-      var.scrub_enabled ? ["arn:aws:s3:::${var.scrub_bucket}"] : []
+      ["arn:aws:s3:::${aws_s3_bucket.downsync.id}"],
+      var.scrub_enabled ? ["arn:aws:s3:::${aws_s3_bucket.scrub_scripts.id}"] : []
     )
   }
   statement {
@@ -122,8 +123,8 @@ data "aws_iam_policy_document" "target_task" {
       "s3:AbortMultipartUpload",
     ]
     resources = concat(
-      ["arn:aws:s3:::${var.source_bucket}/${var.source_rds_identifier}/*"],
-      var.scrub_enabled ? ["arn:aws:s3:::${var.scrub_bucket}/*"] : []
+      ["arn:aws:s3:::${aws_s3_bucket.downsync.id}/${var.source_rds_identifier}/*"],
+      var.scrub_enabled ? ["arn:aws:s3:::${aws_s3_bucket.scrub_scripts.id}/*"] : []
     )
   }
 }

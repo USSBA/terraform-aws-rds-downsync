@@ -20,7 +20,7 @@ resource "aws_cloudwatch_event_rule" "target" {
     ],
     "requestParameters": {
       "bucketName": [
-        "${var.source_bucket}"
+        ${aws_s3_bucket.downsync.id}
       ],
       "key": [
         "${var.source_rds_identifier}/db.tar"

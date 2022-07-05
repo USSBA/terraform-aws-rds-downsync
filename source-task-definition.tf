@@ -22,7 +22,9 @@ resource "aws_ecs_task_definition" "source" {
         { name = "DBHOST", value = var.source_db_host },
         { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
         { name = "SQL_CLIENT", value = var.sql_client },
-        { name = "S3_BUCKET", value = var.source_bucket }
+        #{ name = "S3_BUCKET", value = var.source_bucket }
+        { name = "SOURCE_BUCKET", value = aws_s3_bucket.downsync.id },
+        { name = "SCRUB_BUCKET", value = aws_s3_bucket.scrub_scripts.id },
       ]
       secrets = var.source_container_secrets
       command = ["/usr/local/bin/sync_dump.sh"]
@@ -107,7 +109,7 @@ data "aws_iam_policy_document" "source_task" {
       "s3:ListBucket",
     ]
     resources = [
-      "arn:aws:s3:::${var.source_bucket}"
+      "arn:aws:s3:::${aws_s3_bucket.downsync.id}"
     ]
   }
   statement {
@@ -119,7 +121,7 @@ data "aws_iam_policy_document" "source_task" {
       "s3:AbortMultipartUpload",
     ]
     resources = [
-      "arn:aws:s3:::${var.source_bucket}/${var.source_rds_identifier}/*"
+      "arn:aws:s3:::${aws_s3_bucket.downsync.id}/${var.source_rds_identifier}/*"
     ]
   }
 }
