@@ -24,7 +24,7 @@ variable "sql_client" {
 # source db variables
 variable "database" {
   type        = string
-  description = "Required; List of RDS Identifiers that need to be downsynced."
+  description = "Required; A single RDS Identifier that needs to be downsynced."
 }
 variable "source_rds_identifier" {
   type        = string

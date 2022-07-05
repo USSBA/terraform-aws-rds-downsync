@@ -15,12 +15,15 @@ The module supports the following:
 ### Optional variables
 
 - sql_client: A SQL client version. Must be one of the following: postgresql-client-10 | postgresql-client-11 | postgresql-client-12 | mysql-client. defaults to `postgres-client-12`
+- scrub_enabled: Set to true to enable database scrubbing
 
-### Required variables
+## Required variables
 
 The following variables are required to be passed into the Terraform container.
 
-- database: A single RDS Identifier that need to be downsynced.
+- database: A single RDS Identifier that needs to be downsynced.
+- downsync_bucket_name: Name for the database downsync bucket.
+- scrub_bucket_name: Name for the database scrub bucket.
 - source_prefix: Prefix for the source and target aws resources.
 
 ### Source variables
@@ -46,55 +49,54 @@ The following variables are required to be passed into the Terraform container.
 ### Example
 
 ```
-module "activity_dump" {
-  source = "../"
-
-  image_tag = "v0.0.8"
+  # image_tag should match the version of the module you are using
+  image_tag      = "v0.0.8"
 
   # database parameters
   sql_client = "postgresql-client-12"
-  database   = "stg-activity-rds"
+  database   = "prod-rds"
 
   # source resources
-  source_prefix   = "abc"
-  source_bucket   = "your-db-dump-bucket"
-  source_schedule = "cron(0 7 ? * SAT *)"
+  source_prefix        = "prefix"
+  source_schedule      = "cron(0 7 ? * SAT *)"
+  downsync_bucket_name = "prefix-cheeseburger-bucket"
+  scrub_bucket_name    = "prefix-cheeseburger-scrubs-bucket"
 
   # source db
   source_db_port        = 5432
-  source_rds_identifier = "your-prod-database"
-  source_db_host        = "your-prod-database.domain.com" or "your-prod-database.aaaaaaaaaaaa.us-east-1.rds.amazonaws.com"
+  source_rds_identifier = "stg-rds"
+  source_db_host        = "db.prod.domain.com"
 
   # source network parameters
-  source_ecs_cluster = "your-prod-cluster"
-  source_subnets     = ["subnet-prod1", "subnet-prod2", "subnet-prod3"]
+  source_ecs_cluster = "prod"
+  source_subnets     = ["subnet-0", "subnet-1", "subnet-2"]
 
   # target network resources
-  target_ecs_cluster = "your-stg-cluster"
-  target_subnets     = ["subnet-stg1", "subnet-stg2", "subnet-stg3"]
+  target_ecs_cluster = "stg"
+  target_subnets     = ["subnet-0", "subnet-1", "subnet-2"]
 
   # target db
   target_db_port        = 5432
-  target_rds_identifier = "your-stg-database"
-  target_db_host        = "your-stg-database.domain.com" or "your-stg-database.aaaaaaaaaaaa.us-east-1.rds.amazonaws.com"
+  target_rds_identifier = "stg-rds"
+  target_db_host        = "db.stg.domain.com"
 
   # scrub bucket
-  #scrub_bucket = "your-scrubs-bucket"
+  # fill these values in if you require database scrubbing
   #scrub_enabled = true
   #scrub_scripts = ["scrub01.sh", "scrub02.sh"]
 
   # source secrets
   source_container_secrets = [
-    { name = "DBNAME", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/db_name" },
-    { name = "DBUSER", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/username" },
-    { name = "DBPASSWORD", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/password" },
+    { name = "DBNAME", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/db_name" },
+    { name = "DBUSER", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/username" },
+    { name = "DBPASSWORD", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/password" },
   ]
 
   # target secrets
   target_container_secrets = [
-    { name = "DBNAME", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/db_name" },
-    { name = "DBUSER", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/username" },
-    { name = "DBPASSWORD", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/path/to/param/password" },
+    { name = "DBNAME", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/db_name" },
+    { name = "DBUSER", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/username" },
+    { name = "DBPASSWORD", valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/stg/shared/activity/rds/password" },
   ]
 }
 ```
