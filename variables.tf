@@ -1,5 +1,5 @@
 # default variables
-variable "source_prefix" {
+variable "prefix" {
   type        = string
   description = "Required; Prefix for the source environment where the db dump will be performed."
   default     = ""

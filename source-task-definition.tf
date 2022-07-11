@@ -1,9 +1,9 @@
 resource "aws_cloudwatch_log_group" "source" {
-  name = "${var.source_prefix}-${var.database}-db-dump"
+  name = "${var.prefix}-${var.database}-db-dump"
 }
 
 resource "aws_ecs_task_definition" "source" {
-  family                   = "${var.source_prefix}-${var.database}-db-dump"
+  family                   = "${var.prefix}-${var.database}-db-dump"
   execution_role_arn       = aws_iam_role.source_exec.arn
   task_role_arn            = aws_iam_role.source_task.arn
   network_mode             = "awsvpc"
@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "source" {
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
-      name      = "${var.source_prefix}-${var.database}-db-dump"
+      name      = "${var.prefix}-${var.database}-db-dump"
       image     = "public.ecr.aws/ussba/terraform-aws-rds-downsync:${var.image_tag}"
       cpu       = var.cpu
       memory    = var.memory
@@ -22,7 +22,6 @@ resource "aws_ecs_task_definition" "source" {
         { name = "DBHOST", value = var.source_db_host },
         { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
         { name = "SQL_CLIENT", value = var.sql_client },
-        #{ name = "S3_BUCKET", value = var.source_bucket }
         { name = "SOURCE_BUCKET", value = aws_s3_bucket.downsync.id },
         { name = "SCRUB_BUCKET", value = aws_s3_bucket.scrub_scripts.id },
       ]
@@ -31,9 +30,9 @@ resource "aws_ecs_task_definition" "source" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "${var.source_prefix}-${var.database}-db-dump"
+          awslogs-group         = "${var.prefix}-${var.database}-db-dump"
           awslogs-region        = data.aws_region.account.name
-          awslogs-stream-prefix = "${var.source_prefix}-${var.database}-db-dump"
+          awslogs-stream-prefix = "${var.prefix}-${var.database}-db-dump"
         }
       }
     }
@@ -68,7 +67,7 @@ data "aws_iam_policy_document" "source_exec" {
 }
 
 resource "aws_iam_role" "source_exec" {
-  name = "${var.source_prefix}-${var.database}-db-dump-exec"
+  name = "${var.prefix}-${var.database}-db-dump-exec"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -85,7 +84,7 @@ resource "aws_iam_role" "source_exec" {
 }
 
 resource "aws_iam_policy" "source_exec" {
-  name   = "${var.source_prefix}-${var.database}-db-dump-exec"
+  name   = "${var.prefix}-${var.database}-db-dump-exec"
   path   = "/"
   policy = data.aws_iam_policy_document.source_exec.json
 }
@@ -127,7 +126,7 @@ data "aws_iam_policy_document" "source_task" {
 }
 
 resource "aws_iam_role" "source_task" {
-  name = "${var.source_prefix}-${var.database}-db-dump-task"
+  name = "${var.prefix}-${var.database}-db-dump-task"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -144,7 +143,7 @@ resource "aws_iam_role" "source_task" {
 }
 
 resource "aws_iam_policy" "source_task" {
-  name   = "${var.source_prefix}-${var.database}-db-dump-task"
+  name   = "${var.prefix}-${var.database}-db-dump-task"
   path   = "/"
   policy = data.aws_iam_policy_document.source_task.json
 }
