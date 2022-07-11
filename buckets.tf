@@ -1,6 +1,6 @@
 ## downsync bucket & acl
 resource "aws_s3_bucket" "downsync" {
-  bucket = "${var.source_prefix}-${var.downsync_bucket_name}"
+  bucket = "${var.prefix}-${var.downsync_bucket_name}"
 }
 
 resource "aws_s3_bucket_acl" "downsync_acl" {
@@ -19,12 +19,7 @@ resource "aws_s3_bucket_public_access_block" "downsync_acl_block" {
 
 ### scrubbing bucket & acl
 resource "aws_s3_bucket" "scrub_scripts" {
-  bucket = "${var.source_prefix}-${var.scrub_bucket_name}"
-
-  tags = {
-    Name      = var.scrub_bucket_name
-    ManagedBy = "terraform"
-  }
+  bucket = "${var.prefix}-${var.scrub_bucket_name}"
 }
 
 resource "aws_s3_bucket_acl" "scrub_scripts_acl" {
