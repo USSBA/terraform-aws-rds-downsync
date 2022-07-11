@@ -1,5 +1,5 @@
 # default variables
-variable "source_prefix" {
+variable "prefix" {
   type        = string
   description = "Required; Prefix for the source environment where the db dump will be performed."
   default     = ""
@@ -24,7 +24,7 @@ variable "sql_client" {
 # source db variables
 variable "database" {
   type        = string
-  description = "Required; List of RDS Identifiers that need to be downsynced."
+  description = "Required; A single RDS Identifier that needs to be downsynced."
 }
 variable "source_rds_identifier" {
   type        = string
@@ -54,16 +54,6 @@ variable "target_db_host" {
 }
 
 # s3 bucket variables
-variable "source_bucket" {
-  type        = string
-  description = "Required; Source bucket where the source database dumps are stored."
-}
-variable "scrub_bucket" {
-  type        = string
-  description = "Optional; A s3 bucket that contains scrubbing scripts. Scripts must be in the root of the bucket."
-  nullable    = true
-  default     = null
-}
 variable "scrub_scripts" {
   type        = list(string)
   description = "Optional; A list of scrub scripts. They will be run in the order specified in the list."
@@ -130,4 +120,14 @@ variable "memory" {
   type        = number
   description = "Optional; Memory that is assigned to the task definition. Defaults to 512."
   default     = 512
+}
+
+# s3 variables
+variable "downsync_bucket_name" {
+  type        = string
+  description = "Optional; Name for the database downsync bucket."
+}
+variable "scrub_bucket_name" {
+  type        = string
+  description = "Optional; Name for the database scrub bucket."
 }

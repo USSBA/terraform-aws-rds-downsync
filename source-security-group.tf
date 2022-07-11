@@ -1,5 +1,5 @@
 resource "aws_security_group" "source" {
-  name        = "${var.source_prefix}-${var.database}-downsync"
+  name        = "${var.prefix}-${var.database}-downsync"
   description = "Source security group for ${var.database}"
   vpc_id      = data.aws_subnet.source.vpc_id
 }

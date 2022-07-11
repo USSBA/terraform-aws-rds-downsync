@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_log_group" "target" {
-  name = "${var.source_prefix}-${var.database}-db-restore"
+  name = "${var.prefix}-${var.database}-db-restore"
 }
 
 locals {
@@ -9,15 +9,15 @@ locals {
     { name = "TARGET_RDS_IDENTIFIER", value = var.target_rds_identifier },
     { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
     { name = "SQL_CLIENT", value = var.sql_client },
-    { name = "S3_BUCKET", value = var.source_bucket },
+    { name = "SOURCE_BUCKET", value = aws_s3_bucket.downsync.id },
+    { name = "SCRUB_BUCKET", value = aws_s3_bucket.scrub_scripts.id },
   ]
   optional_environment = [
-    var.scrub_bucket == null ? {} : { name = "SCRUB_BUCKET", value = var.scrub_bucket },
     length(var.scrub_scripts) == 0 ? {} : { name = "SCRUB_SCRIPTS", value = join(" ", var.scrub_scripts) },
   ]
 }
 resource "aws_ecs_task_definition" "target" {
-  family                   = "${var.source_prefix}-${var.database}-db-restore"
+  family                   = "${var.prefix}-${var.database}-db-restore"
   execution_role_arn       = aws_iam_role.target_exec.arn
   task_role_arn            = aws_iam_role.target_task.arn
   network_mode             = "awsvpc"
@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "target" {
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
-      name        = "${var.source_prefix}-${var.database}-db-restore"
+      name        = "${var.prefix}-${var.database}-db-restore"
       image       = "public.ecr.aws/ussba/terraform-aws-rds-downsync:${var.image_tag}"
       cpu         = var.cpu
       memory      = var.memory
@@ -37,9 +37,9 @@ resource "aws_ecs_task_definition" "target" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "${var.source_prefix}-${var.database}-db-restore"
+          awslogs-group         = "${var.prefix}-${var.database}-db-restore"
           awslogs-region        = data.aws_region.account.name
-          awslogs-stream-prefix = "${var.source_prefix}-${var.database}-db-restore"
+          awslogs-stream-prefix = "${var.prefix}-${var.database}-db-restore"
         }
       }
     }
@@ -109,8 +109,8 @@ data "aws_iam_policy_document" "target_task" {
       "s3:ListBucket",
     ]
     resources = concat(
-      ["arn:aws:s3:::${var.source_bucket}"],
-      var.scrub_enabled ? ["arn:aws:s3:::${var.scrub_bucket}"] : []
+      ["arn:aws:s3:::${aws_s3_bucket.downsync.id}"],
+      var.scrub_enabled ? ["arn:aws:s3:::${aws_s3_bucket.scrub_scripts.id}"] : []
     )
   }
   statement {
@@ -122,8 +122,8 @@ data "aws_iam_policy_document" "target_task" {
       "s3:AbortMultipartUpload",
     ]
     resources = concat(
-      ["arn:aws:s3:::${var.source_bucket}/${var.source_rds_identifier}/*"],
-      var.scrub_enabled ? ["arn:aws:s3:::${var.scrub_bucket}/*"] : []
+      ["arn:aws:s3:::${aws_s3_bucket.downsync.id}/${var.source_rds_identifier}/*"],
+      var.scrub_enabled ? ["arn:aws:s3:::${aws_s3_bucket.scrub_scripts.id}/*"] : []
     )
   }
 }
