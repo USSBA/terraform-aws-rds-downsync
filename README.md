@@ -24,7 +24,7 @@ The following variables are required to be passed into the Terraform container.
 - database: A single RDS Identifier that needs to be downsynced.
 - downsync_bucket_name: Name for the database downsync bucket.
 - scrub_bucket_name: Name for the database scrub bucket.
-- source_prefix: Prefix for the source and target aws resources.
+- prefix: Prefix for the source and target aws resources.
 
 ### Source variables
 
