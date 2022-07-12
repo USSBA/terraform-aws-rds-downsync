@@ -17,7 +17,7 @@ variable "cron_enabled" {
 variable "ephemeral_storage" {
   type        = number
   description = "Optional; Override to increase the ephemeral storage allocated to the fargate containers."
-  default     = 10
+  default     = 21
 }
 
 # db variables
