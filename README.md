@@ -14,6 +14,7 @@ The module supports the following:
 
 ### Optional variables
 
+- cron_enabled: Set to false if you would like the cloudwatch events to be disabled on deploy. Default is true.
 - sql_client: A SQL client version. Must be one of the following: postgresql-client-10 | postgresql-client-11 | postgresql-client-12 | mysql-client. defaults to `postgres-client-12`
 - scrub_enabled: Set to true to enable database scrubbing
 
