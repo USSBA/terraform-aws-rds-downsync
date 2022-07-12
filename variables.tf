@@ -22,9 +22,9 @@ variable "sql_client" {
 }
 
 # source db variables
-variable "database" {
+variable "source_database" {
   type        = string
-  description = "Required; A single RDS Identifier that needs to be downsynced."
+  description = "Required; A database name for the source database that needs to be downsynced."
 }
 variable "source_rds_identifier" {
   type        = string
@@ -40,6 +40,10 @@ variable "source_db_host" {
 }
 
 # target db variables
+variable "target_database" {
+  type        = string
+  description = "Required; A database name for the target database that will be restored."
+}
 variable "target_rds_identifier" {
   type        = string
   description = "Required; Target RDS Identifier that will be restored from the source_rds_identifier."

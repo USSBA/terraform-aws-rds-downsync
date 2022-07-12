@@ -1,11 +1,12 @@
 resource "aws_cloudwatch_log_group" "target" {
-  name = "${var.prefix}-${var.database}-db-restore"
+  name = "${var.prefix}-${var.target_rds_identifier}-db-restore"
 }
 
 locals {
   base_environment = [
     { name = "DBPORT", value = tostring(var.target_db_port) },
     { name = "DBHOST", value = var.target_db_host },
+    { name = "DBNAME", value = var.target_database },
     { name = "TARGET_RDS_IDENTIFIER", value = var.target_rds_identifier },
     { name = "SOURCE_RDS_IDENTIFIER", value = var.source_rds_identifier },
     { name = "SQL_CLIENT", value = var.sql_client },
@@ -17,7 +18,7 @@ locals {
   ]
 }
 resource "aws_ecs_task_definition" "target" {
-  family                   = "${var.prefix}-${var.database}-db-restore"
+  family                   = "${var.prefix}-${var.target_rds_identifier}-db-restore"
   execution_role_arn       = aws_iam_role.target_exec.arn
   task_role_arn            = aws_iam_role.target_task.arn
   network_mode             = "awsvpc"
@@ -26,7 +27,7 @@ resource "aws_ecs_task_definition" "target" {
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
-      name        = "${var.prefix}-${var.database}-db-restore"
+      name        = "${var.prefix}-${var.target_rds_identifier}-db-restore"
       image       = "public.ecr.aws/ussba/terraform-aws-rds-downsync:${var.image_tag}"
       cpu         = var.cpu
       memory      = var.memory
@@ -37,9 +38,9 @@ resource "aws_ecs_task_definition" "target" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "${var.prefix}-${var.database}-db-restore"
+          awslogs-group         = "${var.prefix}-${var.target_rds_identifier}-db-restore"
           awslogs-region        = data.aws_region.account.name
-          awslogs-stream-prefix = "${var.prefix}-${var.database}-db-restore"
+          awslogs-stream-prefix = "${var.prefix}-${var.target_rds_identifier}-db-restore"
         }
       }
     }
@@ -74,7 +75,7 @@ data "aws_iam_policy_document" "target_exec" {
 }
 
 resource "aws_iam_role" "target_exec" {
-  name = "${var.prefix}-${var.database}-db-restore-exec"
+  name = "${var.prefix}-${var.target_rds_identifier}-db-restore-exec"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -91,7 +92,7 @@ resource "aws_iam_role" "target_exec" {
 }
 
 resource "aws_iam_policy" "target_exec" {
-  name   = "${var.prefix}-${var.database}-db-restore-exec"
+  name   = "${var.prefix}-${var.target_rds_identifier}-db-restore-exec"
   path   = "/"
   policy = data.aws_iam_policy_document.target_exec.json
 }
@@ -129,7 +130,7 @@ data "aws_iam_policy_document" "target_task" {
 }
 
 resource "aws_iam_role" "target_task" {
-  name = "${var.prefix}-${var.database}-db-restore-task"
+  name = "${var.prefix}-${var.target_rds_identifier}-db-restore-task"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -146,7 +147,7 @@ resource "aws_iam_role" "target_task" {
 }
 
 resource "aws_iam_policy" "target_task" {
-  name   = "${var.prefix}-${var.database}-db-target-task"
+  name   = "${var.prefix}-${var.target_rds_identifier}-db-target-task"
   path   = "/"
   policy = data.aws_iam_policy_document.target_task.json
 }
