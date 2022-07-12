@@ -25,6 +25,9 @@ resource "aws_ecs_task_definition" "target" {
   cpu                      = var.cpu
   memory                   = var.memory
   requires_compatibilities = ["FARGATE"]
+  ephemeral_storage {
+    size_in_gib = var.ephemeral_storage
+  }
   container_definitions = jsonencode([
     {
       name        = "${var.prefix}-${var.target_rds_identifier}-db-restore"

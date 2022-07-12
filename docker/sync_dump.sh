@@ -9,4 +9,4 @@ else
 fi
 
 echo "Copying ${RDS_IDENTIFIER} dump file to s3"
-aws s3 cp "db.tar" "s3://${S3_BUCKET}/${SOURCE_RDS_IDENTIFIER}/db.tar"
+aws s3 cp "db.tar" "s3://${SOURCE_BUCKET}/${SOURCE_RDS_IDENTIFIER}/db.tar"
