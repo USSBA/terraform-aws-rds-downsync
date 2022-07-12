@@ -1,7 +1,7 @@
 resource "aws_security_group" "target" {
   name        = "${var.prefix}-${var.target_rds_identifier}-restore"
   description = "Target security group for ${var.target_rds_identifier}"
-  vpc_id      = data.aws_subnet.source.vpc_id
+  vpc_id      = data.aws_subnet.target.vpc_id
 }
 
 resource "aws_security_group_rule" "target_egress" {

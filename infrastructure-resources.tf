@@ -6,6 +6,10 @@ data "aws_subnet" "source" {
   id = var.source_subnets[0]
 }
 
+data "aws_subnet" "target" {
+  id = var.target_subnets[0]
+}
+
 # rds cluster
 data "aws_rds_cluster" "source" {
   count              = var.rds_identifier_type == "cluster" ? 1 : 0
