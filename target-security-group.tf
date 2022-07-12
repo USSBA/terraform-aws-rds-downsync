@@ -1,6 +1,6 @@
 resource "aws_security_group" "target" {
-  name        = "${var.prefix}-${var.database}-restore"
-  description = "Target security group for ${var.database}"
+  name        = "${var.prefix}-${var.target_rds_identifier}-restore"
+  description = "Target security group for ${var.target_rds_identifier}"
   vpc_id      = data.aws_subnet.source.vpc_id
 }
 

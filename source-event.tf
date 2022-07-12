@@ -1,12 +1,12 @@
 resource "aws_cloudwatch_event_rule" "source" {
-  name                = "${var.prefix}-${var.database}-downsync"
+  name                = "${var.prefix}-${var.source_rds_identifier}-downsync"
   schedule_expression = var.source_schedule
   is_enabled          = true
 }
 
 resource "aws_cloudwatch_event_target" "source" {
   rule      = aws_cloudwatch_event_rule.source.name
-  target_id = "${var.prefix}-${var.database}-downsync"
+  target_id = "${var.prefix}-${var.source_rds_identifier}-downsync"
   arn       = "arn:aws:ecs:${data.aws_region.account.name}:${data.aws_caller_identity.account.account_id}:cluster/${var.source_ecs_cluster}"
   role_arn  = aws_iam_role.source.arn
 
@@ -23,7 +23,7 @@ resource "aws_cloudwatch_event_target" "source" {
   }
 }
 resource "aws_iam_role" "source" {
-  name = "${var.prefix}-${var.database}-event-downsync"
+  name = "${var.prefix}-${var.source_rds_identifier}-event-downsync"
 
   assume_role_policy = <<DOC
 {
@@ -43,7 +43,7 @@ DOC
 }
 
 resource "aws_iam_role_policy" "source" {
-  name = "${var.prefix}-${var.database}-event-downsync"
+  name = "${var.prefix}-${var.source_rds_identifier}-event-downsync"
   role = aws_iam_role.source.id
 
   policy = <<DOC

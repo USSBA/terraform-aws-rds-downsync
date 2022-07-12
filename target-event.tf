@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_event_rule" "target" {
-  name       = "${var.prefix}-${var.database}-restore"
+  name       = "${var.prefix}-${var.target_rds_identifier}-restore"
   is_enabled = true
 
   event_pattern = <<EOF
@@ -33,7 +33,7 @@ EOF
 
 resource "aws_cloudwatch_event_target" "target" {
   rule      = aws_cloudwatch_event_rule.target.name
-  target_id = "${var.prefix}-${var.database}-restore"
+  target_id = "${var.prefix}-${var.target_rds_identifier}-restore"
   arn       = "arn:aws:ecs:${data.aws_region.account.name}:${data.aws_caller_identity.account.account_id}:cluster/${var.target_ecs_cluster}"
   role_arn  = aws_iam_role.target.arn
 
@@ -50,7 +50,7 @@ resource "aws_cloudwatch_event_target" "target" {
   }
 }
 resource "aws_iam_role" "target" {
-  name = "${var.prefix}-${var.database}-event-restore"
+  name = "${var.prefix}-${var.target_rds_identifier}-event-restore"
 
   assume_role_policy = <<DOC
 {
@@ -70,7 +70,7 @@ DOC
 }
 
 resource "aws_iam_role_policy" "target" {
-  name = "${var.prefix}-${var.database}-event-restore"
+  name = "${var.prefix}-${var.target_rds_identifier}-event-restore"
   role = aws_iam_role.target.id
 
   policy = <<DOC
