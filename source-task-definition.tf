@@ -10,6 +10,9 @@ resource "aws_ecs_task_definition" "source" {
   cpu                      = var.cpu
   memory                   = var.memory
   requires_compatibilities = ["FARGATE"]
+  ephemeral_storage {
+    size_in_gib = var.ephemeral_storage
+  }
   container_definitions = jsonencode([
     {
       name      = "${var.prefix}-${var.source_rds_identifier}-db-dump"

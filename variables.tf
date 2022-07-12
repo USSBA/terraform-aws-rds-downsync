@@ -14,6 +14,11 @@ variable "cron_enabled" {
   description = "Optional; Set to false if you would like the cloudwatch events to be disabled on deploy. Default is true."
   default     = true
 }
+variable "ephemeral_storage" {
+  type        = number
+  description = "Optional; Override to increase the ephemeral storage allocated to the fargate containers."
+  default     = 10
+}
 
 # db variables
 variable "rds_identifier_type" {
