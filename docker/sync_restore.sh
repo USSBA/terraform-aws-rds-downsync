@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Downloading database dump from s3"
-aws s3 cp "s3://${S3_BUCKET}/${SOURCE_RDS_IDENTIFIER}/db.tar" .
+aws s3 cp "s3://${SOURCE_BUCKET}/${SOURCE_RDS_IDENTIFIER}/db.tar" .
 
 if [[ ${SQL_CLIENT} == "mysql"* ]]; then
   echo "Running MySQL dump..."
