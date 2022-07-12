@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "target_exec" {
 }
 
 resource "aws_iam_role" "target_exec" {
-  name = "${var.source_prefix}-${var.database}-db-restore-exec"
+  name = "${var.prefix}-${var.database}-db-restore-exec"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -91,7 +91,7 @@ resource "aws_iam_role" "target_exec" {
 }
 
 resource "aws_iam_policy" "target_exec" {
-  name   = "${var.source_prefix}-${var.database}-db-restore-exec"
+  name   = "${var.prefix}-${var.database}-db-restore-exec"
   path   = "/"
   policy = data.aws_iam_policy_document.target_exec.json
 }
@@ -129,7 +129,7 @@ data "aws_iam_policy_document" "target_task" {
 }
 
 resource "aws_iam_role" "target_task" {
-  name = "${var.source_prefix}-${var.database}-db-restore-task"
+  name = "${var.prefix}-${var.database}-db-restore-task"
 
   assume_role_policy = jsonencode({
     Statement = [
@@ -146,7 +146,7 @@ resource "aws_iam_role" "target_task" {
 }
 
 resource "aws_iam_policy" "target_task" {
-  name   = "${var.source_prefix}-${var.database}-db-target-task"
+  name   = "${var.prefix}-${var.database}-db-target-task"
   path   = "/"
   policy = data.aws_iam_policy_document.target_task.json
 }
