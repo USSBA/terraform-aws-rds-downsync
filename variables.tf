@@ -9,6 +9,11 @@ variable "scrub_enabled" {
   description = "Optional; Set to true if database scrubbing is required. Default is false."
   default     = false
 }
+variable "cron_enabled" {
+  type        = bool
+  description = "Optional; Set to false if you would like the cloudwatch events to be disabled on deploy. Default is true."
+  default     = true
+}
 
 # db variables
 variable "rds_identifier_type" {

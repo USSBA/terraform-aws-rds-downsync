@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "source" {
   name                = "${var.prefix}-${var.source_rds_identifier}-downsync"
   schedule_expression = var.source_schedule
-  is_enabled          = true
+  is_enabled          = var.cron_enabled
 }
 
 resource "aws_cloudwatch_event_target" "source" {

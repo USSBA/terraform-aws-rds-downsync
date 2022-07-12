@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_event_rule" "target" {
   name       = "${var.prefix}-${var.target_rds_identifier}-restore"
-  is_enabled = true
+  is_enabled = var.cron_enabled
 
   event_pattern = <<EOF
 {
