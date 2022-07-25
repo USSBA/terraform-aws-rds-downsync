@@ -123,6 +123,14 @@ variable "target_container_secrets" {
   description = "Required; A secret name with a valueFrom path for db_user, db_password, and db_name."
   default     = []
 }
+variable "target_container_environment" {
+  type = list(object({
+    name      = string
+    value     = string
+  }))
+  description = "Optional; A list of environment variables that may need to be injected into the container."
+  default     = []
+}
 
 # generic ecs variables consistent across environments
 variable "cpu" {
