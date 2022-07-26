@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "target" {
       cpu         = var.cpu
       memory      = var.memory
       essential   = true
-      environment = [for k in concat(local.base_environment, local.optional_environment) : k if try(k.name, null) != null]
+      environment = [for k in concat(local.base_environment, local.optional_environment, var.target_container_environment) : k if try(k.name, null) != null]
       secrets     = var.target_container_secrets
       command     = ["/usr/local/bin/sync_restore.sh"]
       logConfiguration = {
