@@ -35,3 +35,12 @@ resource "aws_s3_bucket_public_access_block" "scrub_acl_block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_object" "scrub_scripts" {
+  for_each = toset(var.scrub_scripts)
+
+  bucket      = aws_s3_bucket.scrub_scripts.id
+  key         = each.key
+  source_hash = filemd5("./${each.key}")
+}
+
