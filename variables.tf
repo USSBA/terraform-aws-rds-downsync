@@ -125,8 +125,8 @@ variable "target_container_secrets" {
 }
 variable "target_container_environment" {
   type = list(object({
-    name      = string
-    value     = string
+    name  = string
+    value = string
   }))
   description = "Optional; A list of environment variables that may need to be injected into the container."
   default     = []
