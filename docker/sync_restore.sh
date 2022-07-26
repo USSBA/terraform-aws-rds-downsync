@@ -26,7 +26,6 @@ if [[ ! -z ${SCRUB_SCRIPTS} ]]; then
     aws s3 cp s3://${SCRUB_BUCKET}/${x} .
     echo "Substituting environment variables in ${x}"
     envsubst < ${x} > ${x}
-    #aws s3 cp s3://${S3_BUCKET}/${x} .
     echo "Running script ${x} against ${TARGET_RDS_IDENTIFIER}"
     ${SQL} ${x}
   done
