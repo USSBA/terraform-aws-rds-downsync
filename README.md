@@ -45,7 +45,7 @@ The following variables are required to be passed into the Terraform container.
 - target_db_host: Target Host of the database. This can be a FQDN or the ARN of the database.
 - target_ecs_cluster: Name of the target ecs cluster that the db restore will be performed.
 - target_subnets: List of private subnets that the db restore will be performed from.
-- target_container_secrets: A secret name with a valueFrom path for db_user, db_password, and db_namei for the target database.
+- target_container_secrets: A secret name with a valueFrom path for db_user, db_password, and db_name for the target database.
 
 ### Example
 
